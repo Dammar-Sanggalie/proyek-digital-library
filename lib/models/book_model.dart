@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 // Enhanced OOP Implementation
 class Book {
   String _title;
@@ -79,9 +81,9 @@ class DigitalBook extends Book {
     this._pdfUrl, {
     double rating = 4.0,
     int downloads = 0,
-  }) : _rating = rating,
-       _downloads = downloads,
-       super(title, author, year, category, description);
+  })  : _rating = rating,
+        _downloads = downloads,
+        super(title, author, year, category, description);
 
   // Enhanced getters
   String get fileSize => _fileSize;
@@ -122,12 +124,9 @@ class DigitalBook extends Book {
     return '${super.displayInfo()} - $_format ($_fileSize) • ${_rating.toStringAsFixed(1)}⭐';
   }
 
-  // Additional methods
+  // Updated method using intl package for Indonesian number formatting
   String getFormattedDownloads() {
-    if (_downloads < 1000) return _downloads.toString();
-    if (_downloads < 1000000)
-      return '${(_downloads / 1000).toStringAsFixed(1)}K';
-    return '${(_downloads / 1000000).toStringAsFixed(1)}M';
+    return NumberFormat.compact(locale: 'id_ID').format(_downloads);
   }
 
   @override

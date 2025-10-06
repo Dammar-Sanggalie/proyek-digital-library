@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../data/app_data.dart';
-//import '../models/user_model.dart';
 import 'login_screen.dart';
 
 // Enhanced Profile Screen
@@ -212,8 +212,13 @@ class ProfileScreen extends StatelessWidget {
                             'Books Read',
                             '${AppData.currentUser?.totalBooksRead ?? 0}',
                           ),
+                          if (AppData.currentUser != null)
+                            _buildMiniStat(
+                              'Bergabung',
+                              DateFormat('d MMM y', 'id_ID')
+                                  .format(AppData.currentUser!.joinDate),
+                            ),
                           _buildMiniStat('This Month', '3'),
-                          _buildMiniStat('Total Hours', '24'),
                         ],
                       ),
                     ],
@@ -393,6 +398,7 @@ class ProfileScreen extends StatelessWidget {
                 Navigator.of(ctx).pop();
                 AppData.currentUser = null;
                 AppData.favoriteBooks.clear();
+                AppData.saveFavorites();
                 Navigator.pushAndRemoveUntil(
                   context,
                   PageRouteBuilder(
@@ -450,7 +456,7 @@ class ProfileScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Perpustakaan Mini v2.0',
+              'Digital Libary v2.0',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,

@@ -40,7 +40,7 @@ class _BookLibraryScreenState extends State<BookLibraryScreen>
     return AppData.books.where((book) {
       bool matchesSearch =
           book.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          book.author.toLowerCase().contains(_searchQuery.toLowerCase());
+              book.author.toLowerCase().contains(_searchQuery.toLowerCase());
       bool matchesCategory =
           _selectedCategory == 'All' || book.category == _selectedCategory;
       return matchesSearch && matchesCategory;
@@ -145,19 +145,19 @@ class _BookLibraryScreenState extends State<BookLibraryScreen>
                         ],
                       ),
                       SizedBox(height: 20),
-                      // Stats Row
-                      Row(
+                      // Stats Row (Improved with Wrap)
+                      Wrap(
+                        spacing: 12.0, // Horizontal spacing between chips
+                        runSpacing: 8.0, // Vertical spacing between rows
                         children: [
                           _buildStatChip(
                             '${AppData.books.length} Books',
                             Icons.library_books_rounded,
                           ),
-                          SizedBox(width: 12),
                           _buildStatChip(
                             '${AppData.categories.length} Categories',
                             Icons.category_rounded,
                           ),
-                          SizedBox(width: 12),
                           _buildStatChip(
                             '${AppData.favoriteBooks.length} Favorites',
                             Icons.favorite_rounded,

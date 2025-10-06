@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:getwidget/getwidget.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:convert';
 import '../data/app_data.dart';
 import '../models/book_model.dart';
 
@@ -8,7 +10,7 @@ class EnhancedBookDetailScreen extends StatefulWidget {
   final DigitalBook book;
 
   const EnhancedBookDetailScreen({Key? key, required this.book})
-    : super(key: key);
+      : super(key: key);
 
   @override
   _EnhancedBookDetailScreenState createState() =>
@@ -22,6 +24,9 @@ class _EnhancedBookDetailScreenState extends State<EnhancedBookDetailScreen>
   late Animation<Offset> _slideAnimation;
   bool isFavorite = false;
 
+  // New state variable for user rating
+  double _userRating = 0.0;
+
   @override
   void initState() {
     super.initState();
@@ -32,15 +37,19 @@ class _EnhancedBookDetailScreenState extends State<EnhancedBookDetailScreen>
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
-    _slideAnimation = Tween<Offset>(begin: Offset(0, 0.2), end: Offset.zero)
-        .animate(
-          CurvedAnimation(
-            parent: _animationController,
-            curve: Curves.easeOutCubic,
-          ),
-        );
+    _slideAnimation =
+        Tween<Offset>(begin: Offset(0, 0.2), end: Offset.zero).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOutCubic,
+      ),
+    );
 
     isFavorite = AppData.favoriteBooks.contains(widget.book.title);
+
+    // Load saved rating for this book
+    _userRating = AppData.getUserRating(widget.book.title);
+
     _animationController.forward();
   }
 
@@ -60,6 +69,9 @@ class _EnhancedBookDetailScreenState extends State<EnhancedBookDetailScreen>
       isFavorite = !isFavorite;
     });
 
+    // Save favorites to persistent storage
+    AppData.saveFavorites();
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -68,7 +80,7 @@ class _EnhancedBookDetailScreenState extends State<EnhancedBookDetailScreen>
               isFavorite ? Icons.favorite : Icons.favorite_border,
               color: Colors.white,
             ),
-            SizedBox(width: 12),
+            SizedBox(width: 8),
             Text(isFavorite ? 'Added to favorites' : 'Removed from favorites'),
           ],
         ),
@@ -88,13 +100,7 @@ class _EnhancedBookDetailScreenState extends State<EnhancedBookDetailScreen>
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Row(
-              children: [
-                Icon(Icons.error_outline, color: Colors.white),
-                SizedBox(width: 12),
-                Text('Could not open PDF'),
-              ],
-            ),
+            content: Text('Could not open PDF'),
             backgroundColor: Color(0xFFEF4444),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -105,14 +111,13 @@ class _EnhancedBookDetailScreenState extends State<EnhancedBookDetailScreen>
         );
       }
     } catch (e) {
-      // Fallback for demo - show success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
             children: [
               Icon(Icons.check_circle_outline, color: Colors.white),
-              SizedBox(width: 12),
-              Text('Opening ${widget.book.title}...'),
+              SizedBox(width: 8),
+              Text('Opening PDF...'),
             ],
           ),
           backgroundColor: Color(0xFF10B981),
@@ -243,66 +248,63 @@ class _EnhancedBookDetailScreenState extends State<EnhancedBookDetailScreen>
                                       fit: BoxFit.cover,
                                       errorBuilder:
                                           (context, error, stackTrace) {
-                                            return Container(
-                                              decoration: BoxDecoration(
-                                                color: Colors.white.withOpacity(
-                                                  0.2,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(16),
-                                              ),
-                                              child: Icon(
-                                                Icons.menu_book_rounded,
-                                                size: 60,
-                                                color: Colors.white,
-                                              ),
-                                            );
-                                          },
+                                        return Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withOpacity(
+                                              0.2,
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(16),
+                                          ),
+                                          child: Icon(
+                                            Icons.menu_book_rounded,
+                                            size: 60,
+                                            color: Colors.white,
+                                          ),
+                                        );
+                                      },
                                     ),
                                   ),
                                 ),
                                 SizedBox(height: 20),
-                                // Rating and downloads
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                // Updated Rating & Downloads section
+                                Wrap(
+                                  spacing: 12.0,
+                                  runSpacing: 8.0,
+                                  alignment: WrapAlignment.center,
                                   children: [
-                                    Container(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.star_rounded,
-                                            size: 16,
-                                            color: Colors.amber,
+                                    // New GFRating widget
+                                    GFRating(
+                                      value: _userRating,
+                                      onChanged: (rating) async {
+                                        setState(() {
+                                          _userRating = rating;
+                                        });
+
+                                        // Save the rating
+                                        await AppData.saveRating(
+                                            widget.book.title, rating);
+
+                                        // Show confirmation message
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                                'Thank you! You rated: $rating'),
+                                            backgroundColor: Color(0xFF10B981),
                                           ),
-                                          SizedBox(width: 4),
-                                          Text(
-                                            widget.book.rating.toStringAsFixed(
-                                              1,
-                                            ),
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                        );
+                                      },
+                                      size: GFSize.SMALL,
+                                      color: Colors.amber,
+                                      borderColor: Colors.amber,
+                                      allowHalfRating: true,
                                     ),
-                                    SizedBox(width: 12),
+
+                                    // Downloads counter remains the same
                                     Container(
                                       padding: EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 6,
-                                      ),
+                                          horizontal: 12, vertical: 6),
                                       decoration: BoxDecoration(
                                         color: Colors.white.withOpacity(0.2),
                                         borderRadius: BorderRadius.circular(20),
@@ -310,11 +312,8 @@ class _EnhancedBookDetailScreenState extends State<EnhancedBookDetailScreen>
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          Icon(
-                                            Icons.download_rounded,
-                                            size: 16,
-                                            color: Colors.white,
-                                          ),
+                                          Icon(Icons.download_rounded,
+                                              size: 16, color: Colors.white),
                                           SizedBox(width: 4),
                                           Text(
                                             widget.book.getFormattedDownloads(),
@@ -370,12 +369,12 @@ class _EnhancedBookDetailScreenState extends State<EnhancedBookDetailScreen>
                           ),
                         ),
                         SizedBox(height: 24),
-                        // Book Info Grid
+                        // Book Info Grid - FIXED
                         GridView.count(
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
                           crossAxisCount: 2,
-                          childAspectRatio: 2.5,
+                          childAspectRatio: 1.95,
                           crossAxisSpacing: 12,
                           mainAxisSpacing: 12,
                           children: [
@@ -598,7 +597,7 @@ class _EnhancedBookDetailScreenState extends State<EnhancedBookDetailScreen>
 
   Widget _buildInfoCard(String title, String value, IconData icon) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
@@ -607,24 +606,28 @@ class _EnhancedBookDetailScreenState extends State<EnhancedBookDetailScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: Colors.white.withOpacity(0.7), size: 20),
-          SizedBox(height: 8),
+          Icon(icon, color: Colors.white.withOpacity(0.7), size: 16),
+          SizedBox(height: 5),
           Text(
             value,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
               color: Colors.white,
             ),
             textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          SizedBox(height: 2),
+          SizedBox(height: 1),
           Text(
             title,
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 9,
               color: Colors.white.withOpacity(0.5),
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
