@@ -4,7 +4,7 @@ import '../models/book_model.dart';
 import '../widgets/compact_book_card.dart';
 import '../widgets/search_delegate.dart';
 
-// Enhanced Book Library Screen with Compact Grid
+// Fixed Book Library Screen - No Overflow Issues
 class BookLibraryScreen extends StatefulWidget {
   @override
   _BookLibraryScreenState createState() => _BookLibraryScreenState();
@@ -69,9 +69,9 @@ class _BookLibraryScreenState extends State<BookLibraryScreen>
             opacity: _fadeAnimation,
             child: Column(
               children: [
-                // Enhanced Header
+                // Enhanced Header - FIXED
                 Container(
-                  padding: EdgeInsets.all(20),
+                  padding: EdgeInsets.fromLTRB(20, 20, 20, 16),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [Color(0xFF1A1A2E), Colors.transparent],
@@ -80,22 +80,32 @@ class _BookLibraryScreenState extends State<BookLibraryScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Top Row - FIXED with proper constraints
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'Good ${_getGreeting()}, ${AppData.currentUser?.username.toUpperCase() ?? 'READER'}',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.white.withOpacity(0.7),
-                                    fontWeight: FontWeight.w400,
+                                // Greeting text - FIXED
+                                ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxWidth:
+                                        MediaQuery.of(context).size.width - 100,
+                                  ),
+                                  child: Text(
+                                    'Good ${_getGreeting()}, ${AppData.currentUser?.username.toUpperCase() ?? 'READER'}',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.white.withOpacity(0.7),
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                                 SizedBox(height: 4),
+                                // Title - FIXED
                                 ShaderMask(
                                   shaderCallback: (bounds) => LinearGradient(
                                     colors: [
@@ -111,11 +121,15 @@ class _BookLibraryScreenState extends State<BookLibraryScreen>
                                       color: Colors.white,
                                       letterSpacing: 0.5,
                                     ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ],
                             ),
                           ),
+                          SizedBox(width: 12),
+                          // Search button
                           Container(
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
@@ -140,42 +154,51 @@ class _BookLibraryScreenState extends State<BookLibraryScreen>
                                 color: Colors.white,
                                 size: 22,
                               ),
+                              padding: EdgeInsets.all(8),
+                              constraints: BoxConstraints(
+                                minWidth: 44,
+                                minHeight: 44,
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(height: 20),
-                      // Stats Row (Improved with Wrap)
-                      Wrap(
-                        spacing: 12.0, // Horizontal spacing between chips
-                        runSpacing: 8.0, // Vertical spacing between rows
-                        children: [
-                          _buildStatChip(
-                            '${AppData.books.length} Books',
-                            Icons.library_books_rounded,
-                          ),
-                          _buildStatChip(
-                            '${AppData.categories.length} Categories',
-                            Icons.category_rounded,
-                          ),
-                          _buildStatChip(
-                            '${AppData.favoriteBooks.length} Favorites',
-                            Icons.favorite_rounded,
-                          ),
-                        ],
+                      SizedBox(height: 18),
+                      // Stats Row - FIXED with better spacing
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildStatChip(
+                              '${AppData.books.length} Books',
+                              Icons.library_books_rounded,
+                            ),
+                            SizedBox(width: 10),
+                            _buildStatChip(
+                              '${AppData.categories.length} Categories',
+                              Icons.category_rounded,
+                            ),
+                            SizedBox(width: 10),
+                            _buildStatChip(
+                              '${AppData.favoriteBooks.length} Favorites',
+                              Icons.favorite_rounded,
+                            ),
+                          ],
+                        ),
                       ),
-                      SizedBox(height: 20),
-                      // Categories
+                      SizedBox(height: 18),
+                      // Categories - FIXED
                       Container(
-                        height: 40,
+                        height: 42,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: categories.length,
+                          physics: BouncingScrollPhysics(),
                           itemBuilder: (context, index) {
                             String category = categories.elementAt(index);
                             bool isSelected = category == _selectedCategory;
                             return Padding(
-                              padding: EdgeInsets.only(right: 12),
+                              padding: EdgeInsets.only(right: 10),
                               child: GestureDetector(
                                 onTap: () => setState(
                                   () => _selectedCategory = category,
@@ -204,16 +227,20 @@ class _BookLibraryScreenState extends State<BookLibraryScreen>
                                           : Colors.white.withOpacity(0.1),
                                     ),
                                   ),
-                                  child: Text(
-                                    category,
-                                    style: TextStyle(
-                                      color: isSelected
-                                          ? Colors.white
-                                          : Colors.white.withOpacity(0.7),
-                                      fontWeight: isSelected
-                                          ? FontWeight.w600
-                                          : FontWeight.w400,
-                                      fontSize: 12,
+                                  child: Center(
+                                    child: Text(
+                                      category,
+                                      style: TextStyle(
+                                        color: isSelected
+                                            ? Colors.white
+                                            : Colors.white.withOpacity(0.7),
+                                        fontWeight: isSelected
+                                            ? FontWeight.w600
+                                            : FontWeight.w400,
+                                        fontSize: 12,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                 ),
@@ -225,14 +252,14 @@ class _BookLibraryScreenState extends State<BookLibraryScreen>
                     ],
                   ),
                 ),
-                // Enhanced Books Grid - 3 columns for better space usage
+                // Enhanced Books Grid - FIXED with better proportions
                 Expanded(
                   child: GridView.builder(
-                    padding: EdgeInsets.fromLTRB(16, 0, 16, 120),
+                    padding: EdgeInsets.fromLTRB(16, 8, 16, 120),
+                    physics: BouncingScrollPhysics(),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3, // Changed to 3 columns
-                      childAspectRatio:
-                          0.65, // Adjusted ratio for better proportions
+                      crossAxisCount: 3,
+                      childAspectRatio: 0.62, // Adjusted for better fit
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 16,
                     ),
@@ -253,9 +280,10 @@ class _BookLibraryScreenState extends State<BookLibraryScreen>
     );
   }
 
+  // FIXED stat chip with better constraints
   Widget _buildStatChip(String text, IconData icon) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(16),
@@ -273,6 +301,8 @@ class _BookLibraryScreenState extends State<BookLibraryScreen>
               color: Colors.white.withOpacity(0.7),
               fontWeight: FontWeight.w500,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

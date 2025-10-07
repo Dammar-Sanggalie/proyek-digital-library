@@ -3,7 +3,7 @@ import '../data/app_data.dart';
 import '../models/user_model.dart';
 import 'home_screen.dart';
 
-// Modern Premium Login Screen
+// Fixed Login Screen - Overflow Issues Resolved
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -28,13 +28,11 @@ class _LoginScreenState extends State<LoginScreen>
   void initState() {
     super.initState();
 
-    // Main animation controller
     _animationController = AnimationController(
       duration: Duration(milliseconds: 1500),
       vsync: this,
     );
 
-    // Floating animation for decorative elements
     _floatingController = AnimationController(
       duration: Duration(seconds: 3),
       vsync: this,
@@ -195,10 +193,7 @@ class _LoginScreenState extends State<LoginScreen>
         ),
         child: Stack(
           children: [
-            // Animated background decorations
             _buildBackgroundDecorations(),
-
-            // Main content
             SafeArea(
               child: Center(
                 child: SingleChildScrollView(
@@ -211,8 +206,6 @@ class _LoginScreenState extends State<LoginScreen>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           SizedBox(height: 20),
-
-                          // Logo with scale animation
                           ScaleTransition(
                             scale: _scaleAnimation,
                             child: Hero(
@@ -259,10 +252,7 @@ class _LoginScreenState extends State<LoginScreen>
                               ),
                             ),
                           ),
-
                           SizedBox(height: 48),
-
-                          // Title with gradient
                           ShaderMask(
                             shaderCallback: (bounds) => LinearGradient(
                               colors: [
@@ -281,9 +271,7 @@ class _LoginScreenState extends State<LoginScreen>
                               ),
                             ),
                           ),
-
                           SizedBox(height: 12),
-
                           Text(
                             _isLogin
                                 ? 'Sign in to continue your reading journey'
@@ -296,10 +284,7 @@ class _LoginScreenState extends State<LoginScreen>
                             ),
                             textAlign: TextAlign.center,
                           ),
-
                           SizedBox(height: 48),
-
-                          // Form card with glassmorphism effect
                           Container(
                             padding: EdgeInsets.all(32),
                             decoration: BoxDecoration(
@@ -321,7 +306,6 @@ class _LoginScreenState extends State<LoginScreen>
                               key: _formKey,
                               child: Column(
                                 children: [
-                                  // Username field
                                   _buildModernTextField(
                                     controller: _usernameController,
                                     label: 'Username',
@@ -330,10 +314,7 @@ class _LoginScreenState extends State<LoginScreen>
                                         ? 'Username required'
                                         : null,
                                   ),
-
                                   SizedBox(height: 20),
-
-                                  // Password field
                                   _buildModernTextField(
                                     controller: _passwordController,
                                     label: 'Password',
@@ -348,15 +329,9 @@ class _LoginScreenState extends State<LoginScreen>
                                       return null;
                                     },
                                   ),
-
                                   SizedBox(height: 36),
-
-                                  // Submit button with gradient
                                   _buildGradientButton(),
-
                                   SizedBox(height: 28),
-
-                                  // Divider with text
                                   Row(
                                     children: [
                                       Expanded(
@@ -400,28 +375,24 @@ class _LoginScreenState extends State<LoginScreen>
                                       ),
                                     ],
                                   ),
-
                                   SizedBox(height: 28),
-
-                                  // Toggle auth mode
                                   _buildAuthToggle(),
                                 ],
                               ),
                             ),
                           ),
-
                           SizedBox(height: 32),
-
-                          // Footer text
-                          Text(
-                            'By continuing, you agree to our Terms & Privacy Policy',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.white.withOpacity(0.4),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            child: Text(
+                              'By continuing, you agree to our Terms & Privacy Policy',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white.withOpacity(0.4),
+                              ),
+                              textAlign: TextAlign.center,
                             ),
-                            textAlign: TextAlign.center,
                           ),
-
                           SizedBox(height: 20),
                         ],
                       ),
@@ -439,7 +410,6 @@ class _LoginScreenState extends State<LoginScreen>
   Widget _buildBackgroundDecorations() {
     return Stack(
       children: [
-        // Floating orb 1
         Positioned(
           top: -100,
           right: -100,
@@ -465,8 +435,6 @@ class _LoginScreenState extends State<LoginScreen>
             },
           ),
         ),
-
-        // Floating orb 2
         Positioned(
           bottom: -150,
           left: -100,
@@ -609,11 +577,12 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
+  // FIXED: Auth toggle with proper spacing and overflow prevention
   Widget _buildAuthToggle() {
     return GestureDetector(
       onTap: _toggleAuthMode,
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.05),
           borderRadius: BorderRadius.circular(12),
@@ -623,15 +592,21 @@ class _LoginScreenState extends State<LoginScreen>
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              _isLogin ? "Don't have an account?" : "Already have an account?",
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.6),
-                fontSize: 14,
+            Flexible(
+              child: Text(
+                _isLogin
+                    ? "Don't have an account?"
+                    : "Already have an account?",
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.6),
+                  fontSize: 13,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            SizedBox(width: 8),
+            SizedBox(width: 6),
             ShaderMask(
               shaderCallback: (bounds) => LinearGradient(
                 colors: [
@@ -644,7 +619,7 @@ class _LoginScreenState extends State<LoginScreen>
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
-                  fontSize: 14,
+                  fontSize: 13,
                 ),
               ),
             ),
@@ -658,7 +633,7 @@ class _LoginScreenState extends State<LoginScreen>
               ).createShader(bounds),
               child: Icon(
                 Icons.arrow_forward_rounded,
-                size: 18,
+                size: 16,
                 color: Colors.white,
               ),
             ),

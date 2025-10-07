@@ -3,7 +3,7 @@ import '../data/app_data.dart';
 import '../models/book_model.dart';
 import '../screens/book_detail_screen.dart';
 
-// Compact Book Card Widget for 3-column layout
+// Fixed Compact Book Card - No Overflow Issues
 class CompactBookCard extends StatelessWidget {
   final DigitalBook book;
   final int colorIndex;
@@ -25,17 +25,17 @@ class CompactBookCard extends StatelessWidget {
                 EnhancedBookDetailScreen(book: book),
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: Offset(0.0, 0.3),
-                        end: Offset.zero,
-                      ).animate(animation),
-                      child: child,
-                    ),
-                  );
-                },
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: Offset(0.0, 0.3),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                ),
+              );
+            },
             transitionDuration: Duration(milliseconds: 400),
           ),
         );
@@ -111,39 +111,49 @@ class CompactBookCard extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
-                    stops: [0.5, 1.0],
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.85)
+                    ],
+                    stops: [0.4, 1.0],
                   ),
                 ),
               ),
-              // Content
+              // Content - FIXED with proper constraints
               Padding(
                 padding: EdgeInsets.all(8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Top badges
+                    // Top badges - FIXED overflow
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            book.format,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 8,
-                              fontWeight: FontWeight.w600,
+                        // Format badge
+                        Flexible(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              book.format,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 8,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ),
+                        SizedBox(width: 4),
+                        // Rating badge
                         Container(
                           padding: EdgeInsets.symmetric(
                             horizontal: 4,
@@ -176,86 +186,122 @@ class CompactBookCard extends StatelessWidget {
                       ],
                     ),
                     Spacer(),
-                    // Book info at bottom
-                    Text(
-                      book.title,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        height: 1.2,
-                        shadows: [
-                          Shadow(
-                            offset: Offset(0, 1),
-                            blurRadius: 2,
-                            color: Colors.black.withOpacity(0.7),
-                          ),
-                        ],
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 2),
-                    Text(
-                      book.author,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
-                        fontSize: 9,
-                        fontWeight: FontWeight.w400,
-                        shadows: [
-                          Shadow(
-                            offset: Offset(0, 1),
-                            blurRadius: 2,
-                            color: Colors.black.withOpacity(0.7),
-                          ),
-                        ],
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 4),
-                    // Bottom row with category and download count
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 4,
-                            vertical: 1,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.4),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            book.category,
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
-                              fontSize: 7,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                        Row(
+                    // Book info at bottom - FIXED with better constraints
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
-                              Icons.download_rounded,
-                              size: 8,
-                              color: Colors.white.withOpacity(0.7),
-                            ),
-                            SizedBox(width: 2),
-                            Text(
-                              book.getFormattedDownloads(),
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.7),
-                                fontSize: 7,
-                                fontWeight: FontWeight.w500,
+                            // Title - FIXED
+                            Container(
+                              width: constraints.maxWidth,
+                              child: Text(
+                                book.title,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.2,
+                                  letterSpacing: -0.2,
+                                  shadows: [
+                                    Shadow(
+                                      offset: Offset(0, 1),
+                                      blurRadius: 2,
+                                      color: Colors.black.withOpacity(0.7),
+                                    ),
+                                  ],
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
+                            SizedBox(height: 2),
+                            // Author - FIXED
+                            Container(
+                              width: constraints.maxWidth,
+                              child: Text(
+                                book.author,
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.8),
+                                  fontSize: 8.5,
+                                  fontWeight: FontWeight.w400,
+                                  letterSpacing: -0.1,
+                                  shadows: [
+                                    Shadow(
+                                      offset: Offset(0, 1),
+                                      blurRadius: 2,
+                                      color: Colors.black.withOpacity(0.7),
+                                    ),
+                                  ],
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            // Bottom row - FIXED with Flexible widgets
+                            Row(
+                              children: [
+                                // Category badge
+                                Flexible(
+                                  flex: 2,
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                      vertical: 1,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.4),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      book.category,
+                                      style: TextStyle(
+                                        color: Colors.white.withOpacity(0.9),
+                                        fontSize: 7,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 4),
+                                // Download count
+                                Flexible(
+                                  flex: 1,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Icon(
+                                        Icons.download_rounded,
+                                        size: 7,
+                                        color: Colors.white.withOpacity(0.7),
+                                      ),
+                                      SizedBox(width: 2),
+                                      Flexible(
+                                        child: Text(
+                                          book.getFormattedDownloads(),
+                                          style: TextStyle(
+                                            color:
+                                                Colors.white.withOpacity(0.7),
+                                            fontSize: 7,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ],
-                        ),
-                      ],
+                        );
+                      },
                     ),
                   ],
                 ),
